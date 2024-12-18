@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.mapper.EmpMapper">
+    <insert id="insert">
+        insert into emp(username,password,name,gender,phone,job,salary,image,entry_date,dept_id,create_time,update_time)
+        values(#{username},#{password},#{name},#{gender},#{phone},#{job},#{salary},#{image},#{entryDate},#{deptId},#{createTime},#{updateTime})
+    </insert>
+    <update id="update">
+        update emp
+        <set>
+            <if test="username != null">
+                username = #{username},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="job != null">
+                job = #{job},
+            </if>
+            <if test="salary != null">
+                salary = #{salary},
+            </if>
+            <if test="image != null">
+                image = #{image},
+            </if>
+            <if test="entryDate != null">
+                entry_date = #{entryDate},
+            </if>
+            <if test="deptId != null">
+                dept_id = #{deptId},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="deptName != null">
+                dept_name = #{deptName},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="delete">
+            delete from emp
+            where id in
+            <foreach collection="ids" item="id" separator="," close=")" open="(">
+                #{id}
+            </foreach>
+    </delete>
+
+    <!--    #{}里面的参数，就是java代码中传递进来的参数，因此要有驼峰映射，且最好与sql表中的属性名一致   -->
+    <select id="list" resultType="com.itheima.pojo.Emp">
+        select e.*, d.name deptName
+        from emp e left join dept d on e.dept_id = d.id
+        <where>
++            <if test="name != null">
+                e.name like CONCAT('%', #{name}, '%')
+            </if>
+            <if test="gender != null">
+                and  e.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and e.entry_date between #{begin} and #{end}
+            </if>
+        </where> order by e.update_time desc
+    </select>
+
+
+
+
+    <resultMap id="EmpExprResultMap" type="com.itheima.pojo.EmpExpr">
+
+        <result property="empId" column="emp_id"/>
+        <result property="begin" column="ee_begin"/>
+        <result property="end" column="ee_end"/>
+        <result property="company" column="ee_company"/>
+        <result property="job" column="ee_job"/>
+    </resultMap>
+
+
+    <resultMap id="EmpResultMap" type="com.itheima.pojo.Emp">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="image" column="image"/>
+        <result property="entryDate" column="entry_date"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deptName" column="dept_name"/>
+
+        <!-- 嵌套结果映射，关联 EmpExpr 列表 -->
+        <collection property="exprList" ofType="com.itheima.pojo.EmpExpr" resultMap="EmpExprResultMap"/>
+    </resultMap>
+
+
+
+
+    <select id="findById" resultMap="EmpResultMap">
+        select
+            e.*,
+            expr.emp_id,
+            expr.begin as ee_begin,
+            expr.end as ee_end,
+            expr.company as ee_company,
+            expr.job as ee_job
+        from emp e  left join emp_expr expr on e.id = expr.emp_id
+        where e.id = #{id}
+    </select>
+
+    <select id="getJobData" resultType="map">
+        SELECT
+            IFNULL(d.name, '未知部门') AS deptName,
+            COUNT(e.id) AS empCount
+        FROM
+            emp e
+                LEFT JOIN
+            dept d ON e.job = d.id
+        GROUP BY
+            d.name
+        ORDER BY
+            empCount DESC;
+    </select>
+
+
+</mapper>

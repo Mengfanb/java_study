@@ -1,0 +1,45 @@
+
+spring:
+  application:
+    name: tlias-web-management
+  #数据库连接信息
+  datasource:
+    url: jdbc:mysql://localhost:3306/tlias
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 111111
+    #连接池若不设置，也有默认的连接池
+    #type: com.alibaba.druid.pool.DruidDataSource
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+
+#mybatis相关配置
+mybatis:
+  configuration:
+    #开启驼峰命名开关camel
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  #按规范建包，可以不用此配置
+  mapper-locations: classpath:mybatis/*Mapper.xml
+  #pagehelper分页插件配置
+  pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+#配置日志文件级别
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
+
+#阿里云配置
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    bucketName: java-ai-study
+    region: cn-beijing
+
+
